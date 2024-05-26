@@ -1,0 +1,22 @@
+{
+  "name": "@linzb93/electron-ipc-router",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "router like express and koa in electron ipc",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "vitest run",
+    "build": "tsc && vite build "
+  },
+  "keywords": [
+    "electron",
+    "ipc",
+    "router"
+  ],
+  "author": "linzb93",
+  "license": "ISC",
+  "devDependencies": {
+    "vite": "^5.2.11",
+    "vitest": "^1.6.0"
+  }
+}
