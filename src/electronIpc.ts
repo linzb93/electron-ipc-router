@@ -1,8 +1,9 @@
-import { Listener, IpcListener } from "./types";
+import { IpcAsyncListener, IpcListener } from "./types";
 
 interface ListenerItem {
   name: string;
-  callback: IpcListener;
+  callback: IpcListener | IpcAsyncListener;
+  async: boolean;
 }
 
 const listenerDatabase: ListenerItem[] = [];
@@ -11,13 +12,27 @@ export default {
     listenerDatabase.push({
       name,
       callback: listener,
+      async: false,
+    });
+  },
+  handle(name: string, listener: IpcAsyncListener) {
+    listenerDatabase.push({
+      name,
+      callback: listener,
+      async: true
     });
   },
   send(name: string, data: any) {
-    listenerDatabase.forEach((item) => {
-      if (item.name === name) {
+    listenerDatabase.forEach(async (item) => {
+      if (item.name === name && !item.async) {
         item.callback(null, data);
       }
     });
+  },
+  async invoke(name: string, data: any) {
+    const match = listenerDatabase.find(item => item.async && item.name === name);
+    if (match) {
+      return await match.callback(null, data);
+    }
   },
 };

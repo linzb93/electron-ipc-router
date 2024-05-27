@@ -1,6 +1,6 @@
 # Electron-ipc-router
 
-Electron-ipc-router 是在 Electron 中使用，api 模仿 koa 的方式，旨在解决主进程中`ipcMain`管理混乱的问题。
+Electron-ipc-router 是在 Electron 中使用，api 模仿 koa 的方式，旨在解决主进程中`ipcMain`管理混乱的问题。API和 ipcMain 与 ipcRenderer 类似。
 
 ## 安装
 
@@ -15,10 +15,8 @@ import ipcMainRouter from "@linzb93/electron-ipc-router";
 
 // 管理所有的ipcMain监听事件
 const ipcMain = ipcMainRouter.create();
-// 也可以指定某个事件
-const ipcMain = ipcMainRouter.create("api", routerConfig);
 
-ipcMain.on("user/get", async (body) => await getListFromDatabase(body));
+ipcMain.handle("user/get", async (body) => await getListFromDatabase(body));
 ```
 
 ### Route
@@ -30,7 +28,7 @@ import ipcMainRouter, { Route } from "@linzb93/electron-ipc-router";
 
 const ipcMain = ipcMainRouter.create();
 const router = Route();
-router.on("user/get", async (ctx) => await getListFromDatabase(ctx.body));
+router.handle("user/get", async (ctx) => await getListFromDatabase(ctx.body));
 ipcMain.use("api", router);
 ```
 

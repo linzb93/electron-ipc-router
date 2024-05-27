@@ -6,8 +6,8 @@ const ipcRouter = {
   },
 };
 
-export const request = (name: string, data: any) => {
-  ipcRenderer.send("api", {
+export const request = async (name: string, data: any) => {
+  return await ipcRenderer.invoke("api", {
     name,
     data,
   });
