@@ -17,8 +17,7 @@
   },
   "scripts": {
     "test": "vitest",
-    "build": "tsc && vite build",
-    "prepare": "husky"
+    "build": "tsc && vite build"
   },
   "devDependencies": {
     "chalk": "^5.3.0",
