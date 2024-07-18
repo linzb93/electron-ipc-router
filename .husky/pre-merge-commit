@@ -3,7 +3,7 @@ source_branch=$(git rev-parse --abbrev-ref MERGE_HEAD)
 target_branch=$(git rev-parse --abbrev-ref HEAD)
 
 # 检查是否是从main分支合并到dev分支
-if [[ "$source_branch" == "main" && "$target_branch" == "dev" ]]; then
+if [[ "$source_branch" == "main-test" && "$target_branch" == "dev" ]]; then
     echo "不允许从主分支合并进开发分支！"
     exit 1
 fi
