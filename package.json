@@ -16,7 +16,7 @@
     "require": "./dist/counter.umd.cjs"
   },
   "scripts": {
-    "test": "node checkGitBranch --branch=dev && vitest",
+    "test": "node build/checkGitBranch --branch=dev && vitest",
     "build": "tsc && vite build"
   },
   "devDependencies": {
