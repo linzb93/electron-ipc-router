@@ -16,7 +16,6 @@
     "require": "./dist/counter.umd.cjs"
   },
   "scripts": {
-    "dev": "vite",
     "test": "vitest",
     "build": "tsc && vite build",
     "prepare": "husky"
