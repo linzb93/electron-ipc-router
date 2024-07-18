@@ -1,4 +1,5 @@
 import { Listener, MiddlewareContext, IpcData } from "./types";
+import { IPC_ROUTER_EVENT_KEY } from './constant';
 import ipcMain from "./ipcMain";
 
 interface ListenerItem {
@@ -20,7 +21,7 @@ export default class Application {
 
   constructor() {
     // 支持ipcMain两种通信接收方式
-    ipcMain.on("api", (_event: any, source: IpcData) => {
+    ipcMain.on(IPC_ROUTER_EVENT_KEY, (_event: any, source: IpcData) => {
       const { path, data } = source;
       const matchRouter = () => {
         for (const listener of this.listenerDatabase) {
@@ -32,7 +33,7 @@ export default class Application {
       const next = this.routerNextHandler(path, matchRouter);
       next();
     });
-    ipcMain.handle("api", async (_event: any, source: IpcData) => {
+    ipcMain.handle(IPC_ROUTER_EVENT_KEY, async (_event: any, source: IpcData) => {
       const { path, data } = source;
       const matchRouter = async () => {
         const match = this.listenerDatabase.find(
