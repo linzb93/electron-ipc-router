@@ -11,8 +11,8 @@ export default defineConfig({
     },
     lib: {
       entry: './lib/index.ts',
-      name: 'Counter',
-      fileName: 'counter',
+      name: 'IpcRouter',
+      fileName: 'index',
       formats: ['es'],
     }
   }
