@@ -1,6 +1,7 @@
 export declare class Application {
     private listenerDatabase;
     private middlewareDatabase;
+    private errorHandler;
     constructor();
     /**
      * 以发布/订阅模式监听
@@ -34,13 +35,15 @@ export declare class Application {
      * @param middleware - 中间件处理函数
      */
     use(path: string, middleware: (ctx: MiddlewareContext, next: Function) => any): void;
+    /** */
+    catch(errorHandler: (error: Error, path: string) => any): void;
     private routerNextHandler;
 }
 
-declare const ipcRouter: {
+declare const _default: {
     create(): Application;
 };
-export default ipcRouter;
+export default _default;
 
 declare type Listener = (data: any) => void;
 
