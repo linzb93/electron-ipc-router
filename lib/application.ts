@@ -1,5 +1,6 @@
 import { Listener, MiddlewareContext, IpcData } from "./types";
 import { ipcMain } from "electron";
+import { IPC_ROUTER_EVENT_KEY } from './constant';
 
 interface ListenerItem {
   path: string;
@@ -18,9 +19,18 @@ export default class Application {
   // 存放中间件
   private middlewareDatabase: MiddlewareItem[] = [];
 
+  private errorHandler = (error: Error, path: string) => {
+    console.log(error.message);
+    console.log(path);
+    return {
+      code: 500,
+      message: "server error"
+    }
+  }
+
   constructor() {
     // 支持ipcMain两种通信接收方式
-    ipcMain.on("api", (_event: any, source: IpcData) => {
+    ipcMain.on(IPC_ROUTER_EVENT_KEY, (_event: any, source: IpcData) => {
       const { path, data } = source;
       const matchRouter = () => {
         for (const listener of this.listenerDatabase) {
@@ -32,7 +42,7 @@ export default class Application {
       const next = this.routerNextHandler(path, matchRouter);
       next();
     });
-    ipcMain.handle("api", async (_event: any, source: IpcData) => {
+    ipcMain.handle(IPC_ROUTER_EVENT_KEY, async (_event: any, source: IpcData) => {
       const { path, data } = source;
       const matchRouter = async () => {
         const match = this.listenerDatabase.find(
@@ -44,7 +54,11 @@ export default class Application {
         return null;
       };
       const next = this.routerNextHandler(path, matchRouter);
-      return await next();
+      try {
+        return await next();
+      } catch (e) {
+        return this.errorHandler(e as Error, path);
+      }
     });
   }
   /**
@@ -111,6 +125,10 @@ export default class Application {
       prefix: path,
       callback,
     });
+  }
+  /** */
+  catch(errorHandler: (error: Error, path:string) => any) {
+    this.errorHandler = errorHandler;
   }
 
   private routerNextHandler(path: string, matchRouter: Function) {
