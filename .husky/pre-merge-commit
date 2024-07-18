@@ -1,7 +1,0 @@
-# 获取当前合并操作的源分支名和目标分支名
-source_branch=$(git rev-parse --abbrev-ref MERGE_HEAD)
-target_branch=$(git rev-parse --abbrev-ref HEAD)
-
-echo $source_branch
-echo $target_branch
-exit 0
