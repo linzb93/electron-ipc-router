@@ -54,4 +54,26 @@ describe("ipc-router-application", () => {
     expect(callback).toHaveBeenCalledTimes(0);
     app.removeAllListeners("message");
   });
+
+  it("错误处理", async () => {
+    const errorHandler = vi.fn();
+    errorHandler.mockImplementationOnce((err: Error, path: string) => {
+      return {
+        message: err.message,
+        error:true,
+        path
+      }
+    });
+    app.catch(errorHandler);
+    const eventFn = vi.fn();
+    eventFn.mockImplementationOnce((data:any) => {
+      const a = [];
+      //@ts-ignore
+      a.toFixed();
+      return data;
+    });
+    app.handle("err-test-message", eventFn);
+    const response = await request("err-test-message", 3);
+    expect(response.error).toBeTruthy();
+  })
 });

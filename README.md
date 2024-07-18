@@ -16,7 +16,7 @@ import ipcMainRouter from "@linzb93/electron-ipc-router";
 // 管理所有的ipcMain监听事件
 const ipcMain = ipcMainRouter.create();
 
-ipcMain.handle("user/get", async (body) => await getListFromDatabase(body));
+ipcMain.handle("user-get", async (body) => await getListFromDatabase(body));
 ```
 
 ### Route
@@ -28,7 +28,7 @@ import ipcMainRouter, { Route } from "@linzb93/electron-ipc-router";
 
 const ipcMain = ipcMainRouter.create();
 const router = Route();
-router.handle("user/get", async (ctx) => await getListFromDatabase(ctx.body));
+router.handle("user-get", async (ctx) => await getListFromDatabase(ctx.body));
 ipcMain.use("api", router);
 ```
 
@@ -63,7 +63,7 @@ ipcMain.catch((ctx, error) => {
   console.log(`${ctx.path}错误：${error.message}`);
 });
 
-// 单个 Route 模块下的错误处理
+// TODO: 单个 Route 模块下的错误处理
 const router = Route();
 router.catch((ctx, error) => {
   console.log(`${ctx.path}错误：${error.message}`);
@@ -75,7 +75,7 @@ router.catch((ctx, error) => {
 ```js
 import { request } from "@linzb93/electron-ipc-router";
 (async () => {
-  const users = await request("/api/user/get", {
+  const users = await request("api-user-get", {
     age: 30,
   });
   console.log(users);

@@ -7,3 +7,6 @@ export default {
     return new Application();
   },
 };
+
+// 单元测试用
+export { Application };

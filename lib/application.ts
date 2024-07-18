@@ -19,6 +19,15 @@ export default class Application {
   // 存放中间件
   private middlewareDatabase: MiddlewareItem[] = [];
 
+  private errorHandler = (error: Error, path: string) => {
+    console.log(error.message);
+    console.log(path);
+    return {
+      code: 500,
+      message: "server error"
+    }
+  }
+
   constructor() {
     // 支持ipcMain两种通信接收方式
     ipcMain.on(IPC_ROUTER_EVENT_KEY, (_event: any, source: IpcData) => {
@@ -45,7 +54,11 @@ export default class Application {
         return null;
       };
       const next = this.routerNextHandler(path, matchRouter);
-      return await next();
+      try {
+        return await next();
+      } catch (e) {
+        return this.errorHandler(e as Error, path);
+      }
     });
   }
   /**
@@ -112,6 +125,10 @@ export default class Application {
       prefix: path,
       callback,
     });
+  }
+  /** */
+  catch(errorHandler: (error: Error, path:string) => any) {
+    this.errorHandler = errorHandler;
   }
 
   private routerNextHandler(path: string, matchRouter: Function) {
