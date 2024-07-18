@@ -1,11 +1,13 @@
 import { spawnSync } from "node:child_process";
+import chalk from "chalk";
+
 const { stdout } = spawnSync("git", ["status"]);
 const targetBranch = getArg("branch");
 const expMatch = stdout.toString().match(/On branch (\S+)/);
 if (expMatch) {
   const currentBranchName = expMatch[1];
   if (currentBranchName !== targetBranch) {
-    console.log(`该操作只能在${targetBranch}分支进行`);
+    console.log(`该操作只能在${chalk.red(targetBranch)}分支进行`);
     process.exit(1);
   }
 }

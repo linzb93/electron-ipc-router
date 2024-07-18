@@ -16,8 +16,8 @@
     "require": "./dist/counter.umd.cjs"
   },
   "scripts": {
-    "test": "node checkGitBranch --branch=dev && vitest",
-    "build": "tsc && vite build"
+    "test": "node build/checkGitBranch --branch=dev && vitest",
+    "build": "node build/checkGitBranch --branch=main && tsc && vite build"
   },
   "devDependencies": {
     "chalk": "^5.3.0",
