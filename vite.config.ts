@@ -1,5 +1,7 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from "vitest/config";
 import pkg from './package.json';
+import dts from 'vite-plugin-dts';
+
 export default defineConfig({
   build: {
     rollupOptions: {
@@ -11,9 +13,21 @@ export default defineConfig({
     },
     lib: {
       entry: './lib/index.ts',
-      name: 'IpcRouter',
       fileName: 'index',
       formats: ['es'],
     }
-  }
+  },
+  plugins: [
+    dts({
+      outDir: './',
+      entryRoot: './lib',
+      rollupTypes: true,
+      exclude: ['**/*.test.ts']
+    })
+  ],
+  test: {
+    onConsoleLog() {
+      return true;
+    },
+  },
 })
