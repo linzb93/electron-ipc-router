@@ -1,5 +1,5 @@
 import { Listener, MiddlewareContext, IpcData } from "./types";
-import ipcMain from "./ipcMain";
+import { ipcMain } from "electron";
 
 interface ListenerItem {
   path: string;

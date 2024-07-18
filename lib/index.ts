@@ -1,5 +1,5 @@
 import Application from "./application";
-import ipcRenderer from "./ipcRenderer";
+import { ipcRenderer } from "electron";
 export { default as Route } from "./Route";
 
 const ipcRouter = {
