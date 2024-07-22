@@ -32,34 +32,88 @@ export default class Application {
       IPC_ROUTER_EVENT_KEY,
       async (_event: any, sourceStr: string) => {
         const source = JSON.parse(sourceStr) as IpcData;
-        const { path, data } = source;
-        const matchRouter = async (middlewareRet: any) => {
-          const match = this.listenerDatabase.find(
-            (item) => item.path === path
-          );
-          if (match) {
-            return await match.callback({ params: data });
-          }
-          return middlewareRet;
-        };
-        const next = this.routerNextHandler(path, data, matchRouter);
         try {
-          const result = await next();
-          if (result.code && result.code !== 200) {
-            return {
-              code: result.code,
-              message: result.message,
-            };
-          }
+          const result = await this.routerHandler(source);
           return {
             code: 200,
             result,
           };
-        } catch (e) {
-          return this.errorHandler(e as Error, path);
+        } catch (error: any) {
+          return this.errorHandler(error, source.path);
         }
       }
     );
+  }
+
+  // 路由处理程序
+  private async routerHandler(source: { path: string; data: any }) {
+    const { path, data } = source;
+    const matchRouter = async (middlewareRet: any) => {
+      const match = this.listenerDatabase.find((item) => item.path === path);
+      if (match) {
+        try {
+          return await match.callback({ params: data });
+        } catch (error) {
+          throw error;
+        }
+      }
+      return middlewareRet;
+    };
+    const next = this.routerNextHandler(path, data, matchRouter);
+    try {
+      const result = await next();
+      if (result.code && result.code !== 200) {
+        return {
+          code: result.code,
+          message: result.message,
+        };
+      }
+      return {
+        code: 200,
+        result,
+      };
+    } catch (e) {
+      return this.errorHandler(e as Error, path);
+    }
+  }
+
+  private routerNextHandler(path: string, data: any, matchRouter: Function) {
+    let index = -1;
+    /**
+     * 匹配条件：
+     * 1. mw.prefix为空
+     * 2. mw.prefix不为空时，能够匹配前缀
+     * 3. 同步或异步类型
+     */
+    const isMiddlewareMatch = (middleware: MiddlewareItem) =>
+      middleware.prefix === "" || path.startsWith(`${middleware.prefix}-`);
+    let result: any = null;
+    const next = async () => {
+      if (!this.middlewareDatabase.length) {
+        return matchRouter(result);
+      }
+      index += 1;
+      let middleware = this.middlewareDatabase[index];
+      if (!middleware) {
+        return matchRouter(result);
+      }
+      while (middleware && !isMiddlewareMatch(middleware)) {
+        index += 1;
+        middleware = this.middlewareDatabase[index];
+      }
+      if (!middleware) {
+        return matchRouter(result);
+      }
+      result = await middleware.callback(
+        {
+          path: path.slice(middleware.prefix.length + 1),
+          params: data,
+        },
+        next
+      );
+      return result;
+    };
+    return next;
   }
 
   /**
@@ -119,44 +173,5 @@ export default class Application {
   /** */
   catch(errorHandler: (error: Error, path: string) => any) {
     this.errorHandler = errorHandler;
-  }
-
-  private routerNextHandler(path: string, data: any, matchRouter: Function) {
-    let index = -1;
-    /**
-     * 匹配条件：
-     * 1. mw.prefix为空
-     * 2. mw.prefix不为空时，能够匹配前缀
-     * 3. 同步或异步类型
-     */
-    const isMiddlewareMatch = (middleware: MiddlewareItem) =>
-      middleware.prefix === "" || path.startsWith(`${middleware.prefix}-`);
-    let result: any = null;
-    const next = async () => {
-      if (!this.middlewareDatabase.length) {
-        return matchRouter(result);
-      }
-      index += 1;
-      let middleware = this.middlewareDatabase[index];
-      if (!middleware) {
-        return matchRouter(result);
-      }
-      while (middleware && !isMiddlewareMatch(middleware)) {
-        index += 1;
-        middleware = this.middlewareDatabase[index];
-      }
-      if (!middleware) {
-        return matchRouter(result);
-      }
-      result = await middleware.callback(
-        {
-          path: path.slice(middleware.prefix.length + 1),
-          params: data,
-        },
-        next
-      );
-      return result;
-    };
-    return next;
   }
 }
