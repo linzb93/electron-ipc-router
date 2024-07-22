@@ -3,24 +3,21 @@ import { MiddlewareContext, Listener } from "./types";
 interface ListenerItem {
   path: string;
   callback: Listener;
-  async: boolean;
 }
 
 const Route = () => {
   const database: ListenerItem[] = [];
-  const returnCallback = (ctx: MiddlewareContext, next: Function) => {
-    database.forEach((item) => {
-      if (ctx.path === item.path) {
-        item.callback(ctx);
-      }
-    });
-    next();
+  const returnCallback = async (ctx: MiddlewareContext, next: Function) => {
+    const match = database.find((item) => ctx.path === item.path);
+    if (!match) {
+      return await next();
+    }
+    return await match.callback(ctx);
   };
   returnCallback.handle = (path: string, callback: Listener) => {
     database.push({
       path,
       callback,
-      async: true,
     });
   };
   return returnCallback;

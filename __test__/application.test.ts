@@ -22,7 +22,7 @@ describe("ipc-router-application", () => {
     app.handle("asyncMessage", callback);
     const response = await request("asyncMessage", "654321");
     expect(callback).toHaveBeenCalledTimes(1);
-    expect(response).toBe("654321");
+    expect(response.result.params).toBe("654321");
     app.removeAllListeners("asyncMessage");
   });
 

@@ -1,6 +1,5 @@
 export type Listener = (data: any) => void;
-export type IpcListener = (event: any, data: any) => void;
-export type IpcAsyncListener = (event: any, data: any) => Promise<any>;
+export type IpcListener = (event: any, data: string) => Promise<any>;
 export interface IpcData {
   path: string;
   data: any;
@@ -8,4 +7,5 @@ export interface IpcData {
 
 export interface MiddlewareContext {
   path: string;
+  params: any;
 }

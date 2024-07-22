@@ -5,7 +5,6 @@ import ipcMain from "./ipcMain";
 interface ListenerItem {
   path: string;
   callback: Listener;
-  async: boolean;
 }
 
 interface MiddlewareItem {
@@ -34,18 +33,28 @@ export default class Application {
       async (_event: any, sourceStr: string) => {
         const source = JSON.parse(sourceStr) as IpcData;
         const { path, data } = source;
-        const matchRouter = async () => {
+        const matchRouter = async (middlewareRet: any) => {
           const match = this.listenerDatabase.find(
-            (item) => item.path === path && item.async
+            (item) => item.path === path
           );
           if (match) {
-            return await match.callback(data);
+            return await match.callback({ params: data });
           }
-          return null;
+          return middlewareRet;
         };
-        const next = this.routerNextHandler(path, matchRouter);
+        const next = this.routerNextHandler(path, data, matchRouter);
         try {
-          return await next();
+          const result = await next();
+          if (result.code && result.code !== 200) {
+            return {
+              code: result.code,
+              message: result.message,
+            };
+          }
+          return {
+            code: 200,
+            result,
+          };
         } catch (e) {
           return this.errorHandler(e as Error, path);
         }
@@ -62,7 +71,6 @@ export default class Application {
     this.listenerDatabase.push({
       path,
       callback,
-      async: true,
     });
   }
   /**
@@ -113,7 +121,7 @@ export default class Application {
     this.errorHandler = errorHandler;
   }
 
-  private routerNextHandler(path: string, matchRouter: Function) {
+  private routerNextHandler(path: string, data: any, matchRouter: Function) {
     let index = -1;
     /**
      * 匹配条件：
@@ -122,27 +130,32 @@ export default class Application {
      * 3. 同步或异步类型
      */
     const isMiddlewareMatch = (middleware: MiddlewareItem) =>
-      middleware &&
-      (middleware.prefix === "" || path.startsWith(`${middleware.prefix}-`));
-    const next = () => {
+      middleware.prefix === "" || path.startsWith(`${middleware.prefix}-`);
+    let result: any = null;
+    const next = async () => {
       if (!this.middlewareDatabase.length) {
-        return matchRouter();
+        return matchRouter(result);
       }
       index += 1;
       let middleware = this.middlewareDatabase[index];
       if (!middleware) {
-        return matchRouter();
+        return matchRouter(result);
       }
-      while (!isMiddlewareMatch(middleware)) {
+      while (middleware && !isMiddlewareMatch(middleware)) {
         index += 1;
         middleware = this.middlewareDatabase[index];
       }
-      return middleware.callback(
+      if (!middleware) {
+        return matchRouter(result);
+      }
+      result = await middleware.callback(
         {
           path: path.slice(middleware.prefix.length + 1),
+          params: data,
         },
         next
       );
+      return result;
     };
     return next;
   }

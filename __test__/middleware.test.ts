@@ -30,7 +30,7 @@ describe("ipc-router-middleware", () => {
     const response = await request("mw-handle-message", "hello2");
     expect(middlewareFn).toHaveBeenCalledTimes(1);
     expect(eventFn).toHaveBeenCalledTimes(1);
-    expect(response).toBe("hello2");
+    expect(response.result.params).toBe("hello2");
     app.removeAllListeners("mw-handle-message");
   });
 
@@ -50,7 +50,7 @@ describe("ipc-router-middleware", () => {
     const response = await request("mw-handle-message", "hello2");
     expect(middlewareFn).toHaveBeenCalledTimes(1);
     expect(eventFn).toHaveBeenCalledTimes(1);
-    expect(response).toBe("hello2");
+    expect(response.result.params).toBe("hello2");
     app.removeAllListeners("mw-handle-message");
   });
 

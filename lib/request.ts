@@ -2,10 +2,13 @@ import ipcRenderer from "./ipcRenderer";
 import { IPC_ROUTER_EVENT_KEY } from "./constant";
 
 const request = async (path: string, data: any) => {
-  return await ipcRenderer.invoke(IPC_ROUTER_EVENT_KEY, {
-    path,
-    data,
-  });
+  return await ipcRenderer.invoke(
+    IPC_ROUTER_EVENT_KEY,
+    JSON.stringify({
+      path,
+      data,
+    })
+  );
 };
 
 export default request;
