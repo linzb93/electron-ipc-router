@@ -1,5 +1,5 @@
 import { Listener, MiddlewareContext, IpcData } from "./types";
-import { IPC_ROUTER_EVENT_KEY } from './constant';
+import { IPC_ROUTER_EVENT_KEY } from "./constant";
 import ipcMain from "./ipcMain";
 
 interface ListenerItem {
@@ -24,54 +24,33 @@ export default class Application {
     console.log(path);
     return {
       code: 500,
-      message: "server error"
-    }
-  }
+      message: "server error",
+    };
+  };
 
   constructor() {
-    // 支持ipcMain两种通信接收方式
-    ipcMain.on(IPC_ROUTER_EVENT_KEY, (_event: any, source: IpcData) => {
-      const { path, data } = source;
-      const matchRouter = () => {
-        for (const listener of this.listenerDatabase) {
-          if (listener.path === path && !listener.async) {
-            listener.callback(data);
+    ipcMain.handle(
+      IPC_ROUTER_EVENT_KEY,
+      async (_event: any, sourceStr: string) => {
+        const source = JSON.parse(sourceStr) as IpcData;
+        const { path, data } = source;
+        const matchRouter = async () => {
+          const match = this.listenerDatabase.find(
+            (item) => item.path === path && item.async
+          );
+          if (match) {
+            return await match.callback(data);
           }
+          return null;
+        };
+        const next = this.routerNextHandler(path, matchRouter);
+        try {
+          return await next();
+        } catch (e) {
+          return this.errorHandler(e as Error, path);
         }
       }
-      const next = this.routerNextHandler(path, matchRouter);
-      next();
-    });
-    ipcMain.handle(IPC_ROUTER_EVENT_KEY, async (_event: any, source: IpcData) => {
-      const { path, data } = source;
-      const matchRouter = async () => {
-        const match = this.listenerDatabase.find(
-          (item) => item.path === path && item.async
-        );
-        if (match) {
-          return await match.callback(data);
-        }
-        return null;
-      };
-      const next = this.routerNextHandler(path, matchRouter);
-      try {
-        return await next();
-      } catch (e) {
-        return this.errorHandler(e as Error, path);
-      }
-    });
-  }
-  /**
-   * 以发布/订阅模式监听
-   * @param {string} path - 路径，以`-`符号间隔
-   * @param {Function} callback - (data: any) => void 回调函数
-   */
-  on(path: string, callback: Listener) {
-    this.listenerDatabase.push({
-      path,
-      callback,
-      async: false,
-    });
+    );
   }
 
   /**
@@ -91,7 +70,9 @@ export default class Application {
    * @param {string} path - 事件名称
    */
   removeAllListeners(path: string) {
-    this.listenerDatabase = this.listenerDatabase.filter(item => item.path !== path);
+    this.listenerDatabase = this.listenerDatabase.filter(
+      (item) => item.path !== path
+    );
   }
   /**
    * 移除所有中间件，每个单元测试结束后一定要调用。
@@ -109,11 +90,12 @@ export default class Application {
    * @param path - 中间件对应的路径前缀
    * @param middleware - 中间件处理函数
    */
-  use(path: string, middleware: (ctx: MiddlewareContext, next: Function) => any): void;
   use(
-    ...params: any[]
-  ) {
-    let path = '';
+    path: string,
+    middleware: (ctx: MiddlewareContext, next: Function) => any
+  ): void;
+  use(...params: any[]) {
+    let path = "";
     let callback = null;
     if (params.length === 1) {
       callback = params[0];
@@ -127,19 +109,21 @@ export default class Application {
     });
   }
   /** */
-  catch(errorHandler: (error: Error, path:string) => any) {
+  catch(errorHandler: (error: Error, path: string) => any) {
     this.errorHandler = errorHandler;
   }
 
   private routerNextHandler(path: string, matchRouter: Function) {
     let index = -1;
     /**
-         * 匹配条件：
-         * 1. mw.prefix为空
-         * 2. mw.prefix不为空时，能够匹配前缀
-         * 3. 同步或异步类型
-         */
-    const isMiddlewareMatch = (middleware: MiddlewareItem) => middleware && (middleware.prefix === '' || path.startsWith(`${middleware.prefix}-`));
+     * 匹配条件：
+     * 1. mw.prefix为空
+     * 2. mw.prefix不为空时，能够匹配前缀
+     * 3. 同步或异步类型
+     */
+    const isMiddlewareMatch = (middleware: MiddlewareItem) =>
+      middleware &&
+      (middleware.prefix === "" || path.startsWith(`${middleware.prefix}-`));
     const next = () => {
       if (!this.middlewareDatabase.length) {
         return matchRouter();
@@ -153,10 +137,13 @@ export default class Application {
         index += 1;
         middleware = this.middlewareDatabase[index];
       }
-      return middleware.callback({
-        path: path.slice(middleware.prefix.length + 1)
-      }, next);
-    }
+      return middleware.callback(
+        {
+          path: path.slice(middleware.prefix.length + 1),
+        },
+        next
+      );
+    };
     return next;
   }
 }

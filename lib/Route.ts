@@ -16,13 +16,6 @@ const Route = () => {
     });
     next();
   };
-  returnCallback.on = (path: string, callback: Listener) => {
-    database.push({
-      path,
-      callback,
-      async: false,
-    });
-  };
   returnCallback.handle = (path: string, callback: Listener) => {
     database.push({
       path,

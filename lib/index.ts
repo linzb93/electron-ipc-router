@@ -10,4 +10,4 @@ export default {
 };
 
 // 单元测试用
-export { Application };
+export type { Application };
