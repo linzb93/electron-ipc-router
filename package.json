@@ -1,0 +1,19 @@
+{
+  "name": "root",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "@linzb93/utils": "^0.0.14"
+  },
+  "devDependencies": {
+    "chalk": "^5.3.0",
+    "husky": "^9.0.11",
+    "lerna": "^8.1.7",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.10",
+    "vite-plugin-dts": "4.0.0-beta.0",
+    "vitest": "^1.6.0"
+  }
+}
