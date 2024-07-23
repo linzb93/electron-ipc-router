@@ -1,1 +1,0 @@
-export const IPC_ROUTER_EVENT_KEY = 'ipc-router-api';
