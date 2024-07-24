@@ -1,13 +1,18 @@
 import Application from "./application";
-export { default as Route } from "./Route";
-export { default as request } from "./request";
-export type { MiddlewareContext } from "./types";
+export {default as Route} from './Route';
+import { EVENT_ROUTER_KEY } from "./constant";
+import { PostData, Listener } from "./types";
+interface IServer {
+  handle(name: string, callback: Listener): void
+}
 
-export default {
-  create() {
-    return new Application();
-  },
-};
+export const createServer = (server: IServer) => new Application(server);
+
+interface IClient {
+  invoke(name: string, data: PostData): Promise<any>
+}
+
+export const createClient = (client: IClient) => async (path: string, params: any) => await client.invoke(EVENT_ROUTER_KEY, { path, params })
 
 // 单元测试用
 export type { Application };

@@ -1,57 +1,34 @@
 import { describe, it, expect, vi, beforeAll, afterEach } from "vitest";
-import ipcRouter, { request, Application } from "../lib";
 import { sleep } from "@linzb93/utils";
+import { createServer, createClient, Application } from '../lib';
+import { client, server } from '../../demo/lib';
 
-describe("ipc-router-application", () => {
+describe('event-router-basic', () => {
   let app: Application;
-
+  let request: any;
   beforeAll(() => {
-    app = ipcRouter.create();
+    app = createServer(server);
+    request = createClient(client);
   });
-
   afterEach(() => {
     vi.restoreAllMocks();
   });
-
-  it("基础通信", async () => {
-    const callback = vi.fn();
-    callback.mockImplementationOnce(async (message: string) => {
-      await sleep(1000);
-      return message;
-    });
-    app.handle("basicMessage", callback);
-    const response = await request("basicMessage", "message from event basicMessage");
-    expect(callback).toHaveBeenCalledTimes(1);
-    expect(response).toBe("message from event basicMessage");
-    app.removeAllListeners("basicMessage");
-  });
-
-  it("没有监听的事件无法触发", async () => {
-    const callback = vi.fn();
-    app.handle("unTriggerMessage", callback);
-    const response = await request("basicMessage", "hello");
-    expect(response.code).toBe(404);
-  });
-
-  it.skip("错误处理", async () => {
-    const errorHandler = vi.fn();
-    errorHandler.mockImplementationOnce((err: Error, path: string) => {
-      return {
-        message: err.message,
-        error: true,
-        path,
-      };
-    });
-    app.catch(errorHandler);
-    const eventFn = vi.fn();
-    eventFn.mockImplementationOnce((data: any) => {
-      const a = [];
-      //@ts-ignore
-      a.toFixed();
+  it('基础功能', async () => {
+    app.handle('message', async data => {
+      await sleep(300);
       return data;
     });
-    app.handle("err-test-message", eventFn);
-    const response = await request("err-test-message", 3);
-    expect(response.error).toBeTruthy();
+    const response = await request('message', 'hello');
+    expect(response.result).toBe('hello');
+    app.removeAllListeners("message");
   });
-});
+  it('找不到的', async () => {
+    app.handle('message', async data => {
+      await sleep(100);
+      return data;
+    });
+    const response = await request('unknown-message', 'hello');
+    expect(response.code).toBe(404);
+    app.removeAllListeners("message");
+  });
+})

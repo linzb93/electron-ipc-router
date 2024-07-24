@@ -1,11 +1,19 @@
-export type Listener = (data: any) => void;
-export type IpcListener = (event: any, data: string) => Promise<any>;
-export interface IpcData {
+export interface PostData {
   path: string;
-  data: any;
+  params: any;
 }
+export type Listener = (data: PostData) => Promise<any>;
 
 export interface MiddlewareContext {
   path: string;
   params: any;
+}
+
+export interface IServer {
+  handle(name: string, callback: Listener):void
+}
+
+export interface MiddlewareItem {
+  prefix: string;
+  callback: (ctx: MiddlewareContext, next: Function) => void;
 }
