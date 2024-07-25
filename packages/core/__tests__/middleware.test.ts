@@ -33,7 +33,7 @@ describe("ipc-router-middleware", () => {
     const response = await request("mw-handle-message", "hello2");
     expect(middlewareFn).toHaveBeenCalledTimes(1);
     expect(eventFn).toHaveBeenCalledTimes(1);
-    expect(response).toBe("hello2");
+    expect(response.result).toBe("hello2");
     app.removeAllListeners("mw-handle-message");
   });
 
@@ -53,7 +53,7 @@ describe("ipc-router-middleware", () => {
     const response = await request("mw-handle-message", "hello2");
     expect(middlewareFn).toHaveBeenCalledTimes(1);
     expect(eventFn).toHaveBeenCalledTimes(1);
-    expect(response).toBe("hello2");
+    expect(response.result).toBe("hello2");
     app.removeAllListeners("mw-handle-message");
   });
   it("中间件代码在next后面的", async () => {
@@ -111,7 +111,7 @@ describe("ipc-router-middleware", () => {
     app.use("user", router);
     const response = await request("user-message", "nothing");
     expect(eventFn).toHaveBeenCalledTimes(1);
-    expect(response).toBe("nothing");
+    expect(response.result).toBe("nothing");
     app.removeAllListeners("user-message");
   });
 

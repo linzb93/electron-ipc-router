@@ -20,7 +20,7 @@ describe("event-router-basic", () => {
       return data;
     });
     const response = await request("message", "hello");
-    expect(response).toBe("hello");
+    expect(response.result).toBe("hello");
     app.removeAllListeners("message");
   });
   it("接口找不到的", async () => {

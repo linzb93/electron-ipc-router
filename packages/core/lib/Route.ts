@@ -1,6 +1,6 @@
 import { HTTP_CODE_MAP } from "./constant";
 import { MiddlewareContext, Listener } from "./types";
-import { getErrorHandler, ErrorHandlerFn } from "./error";
+import { getErrorHandler } from "./error";
 interface ListenerItem {
   path: string;
   callback: Listener;
@@ -26,7 +26,10 @@ const Route = () => {
         message: error.message,
       };
     }
-    return result;
+    return {
+      code: HTTP_CODE_MAP.SUCCESS,
+      result,
+    };
   };
   returnCallback.handle = (path: string, callback: Listener) => {
     database.push({

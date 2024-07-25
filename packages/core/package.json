@@ -1,12 +1,11 @@
 {
-  "name": "@linzb93/core-event-router",
-  "version": "0.0.1",
-  "private": true,
-  "description": "event router核心代码",
+  "name": "@linzb93/event-router",
+  "version": "1.0.0",
+  "description": "event router",
   "author": "linzb93",
   "homepage": "https://github.com/linzb93/event-router#readme",
   "license": "ISC",
-  "main": "lib/index.js",
+  "main": "dist/index.js",
   "type": "module",
   "publishConfig": {
     "access": "public"
@@ -25,6 +24,7 @@
     "url": "git+https://github.com/linzb93/event-router.git"
   },
   "scripts": {
-    "test": "vitest"
+    "test": "vitest",
+    "build": "tsc --declaration & vite build"
   }
 }

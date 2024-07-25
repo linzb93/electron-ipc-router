@@ -1,7 +1,7 @@
 import Application from "./application";
 export { default as Route } from "./Route";
 import { EVENT_ROUTER_KEY } from "./constant";
-import { PostData, Listener } from "./types";
+import { PostData, Listener, MiddlewareContext } from "./types";
 interface IServer {
   handle(name: string, callback: Listener): void;
 }
@@ -17,4 +17,4 @@ export const createClient =
     await client.invoke(EVENT_ROUTER_KEY, { path, params });
 
 // 单元测试用
-export type { Application };
+export type { Application, MiddlewareContext, PostData };

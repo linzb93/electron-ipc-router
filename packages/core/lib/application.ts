@@ -12,7 +12,7 @@ interface ListenerItem {
   path: string;
   callback: Listener;
 }
-export default class {
+export default class Application {
   // 存放路由处理函数
   private routerDatabase: ListenerItem[] = [];
   // 存放中间件
@@ -33,7 +33,10 @@ export default class {
       const route = this.routerDatabase.find((item) => item.path === path);
       if (route) {
         try {
-          return await route.callback(params);
+          return {
+            code: HTTP_CODE_MAP.SUCCESS,
+            result: await route.callback(params),
+          };
         } catch (error: any) {
           const errorHandler = getErrorHandler();
           errorHandler(path, error);
@@ -51,7 +54,10 @@ export default class {
           message: "NOT_FOUND",
         };
       }
-      return middlewareRet;
+      return {
+        code: HTTP_CODE_MAP.SUCCESS,
+        result: middlewareRet,
+      };
     };
     try {
       const next = this.routerNextHandler(path, params, matchRouter);
