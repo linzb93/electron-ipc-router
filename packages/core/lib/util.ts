@@ -1,23 +1,15 @@
+import { HTTP_CODE_MAP } from "./constant";
 interface IResult {
-    code?:number;
-    message?:string;
-    result: any;
+  code?: number;
+  message?: string;
+  result: any;
 }
-export const responseFormatter = (params?:IResult) => {
-    if (!params) {
-        return {
-            code: 404,
-            message: 'NOT_FOUND'
-        }
+
+export const logger = {
+  error(text: string) {
+    if (process.env.VITEST) {
+      return;
     }
-    if (!params.code) {
-        return {
-            code: 200,
-            result: params.result
-        }
-    }
-    return {
-        code: params.code,
-        message: params.message
-    }
-}
+    console.log(text);
+  },
+};

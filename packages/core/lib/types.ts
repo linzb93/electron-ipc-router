@@ -6,11 +6,12 @@ export type Listener = (data: PostData) => Promise<any>;
 
 export interface MiddlewareContext {
   path: string;
+  prefix: string;
   params: any;
 }
 
 export interface IServer {
-  handle(name: string, callback: Listener):void
+  handle(name: string, callback: Listener): void;
 }
 
 export interface MiddlewareItem {
