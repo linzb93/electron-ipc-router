@@ -33,7 +33,7 @@ describe("ipc-router-middleware", () => {
     const response = await request("mw-handle-message", "hello2");
     expect(middlewareFn).toHaveBeenCalledTimes(1);
     expect(eventFn).toHaveBeenCalledTimes(1);
-    expect(response.result).toBe("hello2");
+    expect(response.result.params).toBe("hello2");
     app.removeAllListeners("mw-handle-message");
   });
 
@@ -53,7 +53,7 @@ describe("ipc-router-middleware", () => {
     const response = await request("mw-handle-message", "hello2");
     expect(middlewareFn).toHaveBeenCalledTimes(1);
     expect(eventFn).toHaveBeenCalledTimes(1);
-    expect(response.result).toBe("hello2");
+    expect(response.result.params).toBe("hello2");
     app.removeAllListeners("mw-handle-message");
   });
   it("中间件代码在next后面的", async () => {
@@ -104,14 +104,14 @@ describe("ipc-router-middleware", () => {
     const eventFn = vi.fn();
     eventFn.mockImplementationOnce(async (ctx) => {
       await sleep(300);
-      return ctx.params;
+      return ctx;
     });
     const router = Route();
     router.handle("message", eventFn);
     app.use("user", router);
     const response = await request("user-message", "nothing");
     expect(eventFn).toHaveBeenCalledTimes(1);
-    expect(response.result).toBe("nothing");
+    expect(response.result.params).toBe("nothing");
     app.removeAllListeners("user-message");
   });
 
@@ -131,5 +131,28 @@ describe("ipc-router-middleware", () => {
     expect(eventFn).toHaveBeenCalledTimes(1);
     expect(response.code).toBe(HTTP_CODE_MAP.SERVER_INTERNAL_ERROR);
     app.removeAllListeners("user-message");
+  });
+
+  it("路由与子路由", async () => {
+    const routerFn = vi.fn();
+    routerFn.mockImplementationOnce(async (ctx) => {
+      await sleep(300);
+      return ctx;
+    });
+    const router = Route();
+    router.handle("message", routerFn);
+    app.use("user", router);
+    const eventFn = vi.fn();
+    eventFn.mockImplementationOnce(async (ctx) => {
+      await sleep(300);
+      return ctx;
+    });
+    app.handle("about", eventFn);
+    const response1 = await request("user-message", "nothing");
+    const response2 = await request("about", "Beijing");
+    expect(routerFn).toHaveBeenCalledTimes(1);
+    expect(response1.result.params).toBe("nothing");
+    expect(response2.result.params).toBe("Beijing");
+    app.removeAllListeners("about");
   });
 });

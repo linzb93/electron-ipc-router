@@ -35,7 +35,7 @@ export default class Application {
         try {
           return {
             code: HTTP_CODE_MAP.SUCCESS,
-            result: await route.callback(params),
+            result: await route.callback(data),
           };
         } catch (error: any) {
           const errorHandler = getErrorHandler();
